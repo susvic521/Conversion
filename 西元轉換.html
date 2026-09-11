@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西元 / 民國 年份轉換器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="number"]:focus {
+            border-color: #4A90E2;
+            outline: none;
+        }
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            color: #aaa;
+            font-size: 14px;
+            position: relative;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        .result-box {
+            background-color: #eef5ff;
+            border-left: 4px solid #4A90E2;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-size: 15px;
+            color: #333;
+        }
+        .clear-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+        .clear-btn:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>年份轉換器</h2>
+    
+    <!-- 西元輸入區 -->
+    <div class="input-group">
+        <label for="adInput">西元年 (AD)</label>
+        <input type="number" id="adInput" placeholder="例如：2024" oninput="convertFromAD()">
+    </div>
+
+    <div class="divider">雙向轉換</div>
+
+    <!-- 民國輸入區 -->
+    <div class="input-group">
+        <label for="rocInput">民國年 (ROC)</label>
+        <input type="number" id="rocInput" placeholder="例如：113" oninput="convertFromROC()">
+    </div>
+
+    <!-- 清除按鈕 -->
+    <button class="clear-btn" onclick="clearInputs()">清除內容</button>
+
+    <!-- 提示訊息 -->
+    <div class="result-box" id="infoBox">
+        請在上方任一欄位輸入年份進行轉換。
+    </div>
+</div>
+
+<script>
+    const adInput = document.getElementById('adInput');
+    const rocInput = document.getElementById('rocInput');
+    const infoBox = document.getElementById('infoBox');
+
+    // 西元轉民國
+    function convertFromAD() {
+        const adVal = adInput.value;
+
+        if (adVal === "") {
+            rocInput.value = "";
+            infoBox.innerHTML = "請在上方任一欄位輸入年份進行轉換。";
+            return;
+        }
+
+        const ad = parseInt(adVal, 10);
+        
+        if (ad >= 1912) {
+            const roc = ad - 1911;
+            rocInput.value = roc;
+            infoBox.innerHTML = `西元 <strong>${ad}</strong> 年 = 民國 <strong>${roc}</strong> 年`;
+        } else if (ad > 0) {
+            const rocBefore = 1912 - ad;
+            rocInput.value = -rocBefore; // 民國前以負數表示
+            infoBox.innerHTML = `西元 <strong>${ad}</strong> 年 = 民國前 <strong>${rocBefore}</strong> 年`;
+        } else {
+            rocInput.value = "";
+            infoBox.innerHTML = "請輸入有效的正整數年份。";
+        }
+    }
+
+    // 民國轉西元
+    function convertFromROC() {
+        const rocVal = rocInput.value;
+
+        if (rocVal === "") {
+            adInput.value = "";
+            infoBox.innerHTML = "請在上方任一欄位輸入年份進行轉換。";
+            return;
+        }
+
+        const roc = parseInt(rocVal, 10);
+
+        if (roc > 0) {
+            const ad = roc + 1911;
+            adInput.value = ad;
+            infoBox.innerHTML = `民國 <strong>${roc}</strong> 年 = 西元 <strong>${ad}</strong> 年`;
+        } else if (roc < 0) {
+            const rocBefore = Math.abs(roc);
+            const ad = 1912 - rocBefore;
+            if (ad > 0) {
+                adInput.value = ad;
+                infoBox.innerHTML = `民國前 <strong>${rocBefore}</strong> 年 = 西元 <strong>${ad}</strong> 年`;
+            } else {
+                adInput.value = "";
+                infoBox.innerHTML = "超出合理計算範圍。";
+            }
+        } else {
+            // 輸入 0 的情況（歷史上沒有民國 0 年）
+            adInput.value = "";
+            infoBox.innerHTML = "歷史上沒有「民國 0 年」（民國 1 年的前一年為民國前 1 年）。";
+        }
+    }
+
+    // 清除輸入
+    function clearInputs() {
+        adInput.value = "";
+        rocInput.value = "";
+        infoBox.innerHTML = "請在上方任一欄位輸入年份進行轉換。";
+    }
+</script>
+
+</body>
+</html>
